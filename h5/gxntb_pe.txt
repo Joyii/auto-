@@ -1,0 +1,305 @@
+帮我写一个php。
+1. 数据存储在 本目录下 gxntb.csv
+2. 数据格式如下：
+时间，内容，备注，创建人
+3. 参考如下文件修改。
+“
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPS Document List</title>
+     <link rel="stylesheet" href="./WPS Document List_files/bootstrap.min.css">
+    <script src="./WPS Document List_files/jquery.min.js"></script>
+    <script src="./WPS Document List_files/popper.min.js"></script>
+    <script src="./WPS Document List_files/bootstrap.min.js"></script>
+</head>
+
+<body>
+<?php 
+        include('header.php');  
+?>
+       <div >
+        <h1 class="my-4">WPS Document List</h1>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link <?php echo (isset($_GET['tag']) && $_GET['tag'] == 'add') ? 'active' : ''; ?>" href="?tag=add">Add</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (isset($_GET['tag']) && $_GET['tag'] == 'list') ? 'active' : ''; ?>" href="?tag=list">List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (isset($_GET['tag']) && $_GET['tag'] == 'search') ? 'active' : ''; ?>" href="?tag=search">Search</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <?php if (isset($_GET['tag']) && $_GET['tag'] == 'add') : ?>
+                <div id="add" class="tab-pane fade show active">
+                    <h3 class="my-4">Add New Document</h3>
+                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . "?tag=add"); ?>">
+                        <div class="form-group">
+                            <label for="input">Document Link:</label>
+                            <textarea class="form-control" rows="3" id="input" name="input" style="width: 450px; height: 80px;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="add">Add</button>
+                    </form>
+                </div>
+            <?php elseif (isset($_GET['tag']) && $_GET['tag'] == 'list') : ?>
+                <div id="list" class="tab-pane fade show active">
+                    <h3 class="my-4">Document List</h3>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>URL</th>
+                                <th>Update</th>
+                                <th>Person</th>
+                                <th>Notes</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // 读取CSV文件并显示列表
+                            if (($handle = fopen("wpsdoclist.csv", "r")) !== FALSE) {
+                                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                                    echo "<tr>";
+                                    echo "<td>" . $data[0] . "</td>";
+                                    echo "<td>" . $data[1] . "</td>";
+                                    echo "<td><a href='" . $data[2] . "' target='_blank'>" . $data[2] . "</a></td>";
+                                    echo "<td>" . $data[3] . "</td>";
+                                    echo "<td>" . $data[4] . "</td>";
+                                    echo "<td>" . $data[5] . "</td>";
+                                    echo "<td>
+                                            <a href='?tag=edit&id=" . $data[0] . "' class='btn btn-sm btn-primary'>Edit</a>
+                                            <a href='?tag=list&del=" . $data[0] . "' class='btn btn-sm btn-danger' onclick='return confirm(\"Are you sure you want to delete this item?\")'>Delete</a>
+                                          </td>";
+                                    echo "</tr>";
+                                }
+                                fclose($handle);
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php elseif (isset($_GET['tag']) && $_GET['tag'] == 'search') : ?>
+                <div id="search" class="tab-pane fade show active">
+                    <h3 class="my-4">Search Document</h3>
+                    <form method="get" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                        <input type="hidden" name="tag" value="search">
+                        <div class="form-group">
+                            <label for="keyword">Keyword:</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword">
+                        </div>
+                        <button type="submit" class="btn btn-primary" name="search">Search</button>
+                    </form>
+                    <?php
+                    // 处理搜索功能
+                    if (isset($_GET['search'])) {
+                        $keyword = $_GET['keyword'];
+                        echo "<h4 class='my-4'>Search Results for: " . $keyword . "</h4>";
+                        echo "<table class='table table-striped'>";
+                        echo "<thead><tr><th>ID</th><th>Title</th><th>URL</th><th>Update</th><th>Person</th><th>Notes</th></tr></thead>";
+                        echo "<tbody>";
+                        if (($handle = fopen("wpsdoclist.csv", "r")) !== FALSE) {
+                            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                                if (stripos($data[1], $keyword) !== false || stripos($data[5], $keyword) !== false) {
+                                    echo "<tr>";
+                                    echo "<td>" . $data[0] . "</td>";
+                                    echo "<td>" . $data[1] . "</td>";
+                                    echo "<td><a href='" . $data[2] . "' target='_blank'>" . $data[2] . "</a></td>";
+                                    echo "<td>" . $data[3] . "</td>";
+                                    echo "<td>" . $data[4] . "</td>";
+                                    echo "<td>" . $data[5] . "</td>";
+                                    echo "</tr>";
+                                }
+                            }
+                            fclose($handle);
+                        }
+                        echo "</tbody></table>";
+                    }
+                    ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+
+    <?php
+    // 处理添加、编辑和删除功能
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add'])) {
+        $input = $_POST['input'];
+        $title = extractTitle($input);
+        $url = extractURL($input);
+        $update = date("Y/m/d");
+        $person = extractPerson($title);
+        $notes = "";
+
+        $data = array(getNextId(), $title, $url, $update, $person, $notes);
+        $fp = fopen('wpsdoclist.csv', 'a');
+        fputcsv($fp, $data);
+        fclose($fp);
+        header("Location: ?tag=list");
+        exit();
+    }
+
+    if (isset($_GET['tag']) && $_GET['tag'] == 'edit' && isset($_GET['id'])) {
+        $id = $_GET['id'];
+        $data = getDataById($id);
+        if ($data) {
+            echo "<div class='modal fade' id='editModal' tabindex='-1' role='dialog' aria-labelledby='editModalLabel' aria-hidden='true'>
+                    <div class='modal-dialog' role='document'>
+                        <div class='modal-content'>
+                            <div class='modal-header'>
+                                <h5 class='modal-title' id='editModalLabel'>Edit Document</h5>
+                                <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+                                    <span aria-hidden='true'>&times;</span>
+                                </button>
+                            </div>
+                            <div class='modal-body'>
+                                <form method='post' action='" . htmlspecialchars($_SERVER["PHP_SELF"] . "?tag=list") . "'>
+                                    <input type='hidden' name='id' value='" . $data[0] . "'>
+                                    <div class='form-group'>
+                                        <label for='title'>Title:</label>
+                                        <input type='text' class='form-control' id='title' name='title' value='" . $data[1] . "'>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label for='url'>URL:</label>
+                                        <input type='text' class='form-control' id='url' name='url' value='" . $data[2] . "'>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label for='person'>Person:</label>
+                                        <input type='text' class='form-control' id='person' name='person' value='" . $data[4] . "'>
+                                    </div>
+                                    <div class='form-group'>
+                                        <label for='notes'>Notes:</label>
+                                        <textarea class='form-control' id='notes' name='notes'>" . $data[5] . "</textarea>
+                                    </div>
+                                    <button type='submit' class='btn btn-primary' name='update'>Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                  </div>";
+            echo "<script>$('#editModal').modal('show');</script>";
+        }
+    }
+
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update'])) {
+        $id = $_POST['id'];
+        $title = $_POST['title'];
+        $url = $_POST['url'];
+        $person = $_POST['person'];
+        $notes = $_POST['notes'];
+        $update = date("Y/m/d");
+
+        updateData($id, $title, $url, $update, $person, $notes);
+        header("Location: ?tag=list");
+        exit();
+    }
+
+    if (isset($_GET['tag']) && $_GET['tag'] == 'list' && isset($_GET['del'])) {
+        $id = $_GET['del'];
+        deleteData($id);
+        header("Location: ?tag=list");
+        exit();
+    }
+
+    // 辅助函数
+    function extractTitle($input) {
+        preg_match('/【金山文档】\s*(.+)/', $input, $matches);
+        if (isset($matches[1])) {
+            return $matches[1];
+        } else {
+            return "";
+        }
+    }
+
+    function extractURL($input) {
+        preg_match('/https:\/\/kdocs\.cn\/l\/\w+/', $input, $matches);
+        if (isset($matches[0])) {
+            return $matches[0];
+        } else {
+            return "";
+        }
+    }
+
+    function extractPerson($title) {
+        $parts = explode("-", $title);
+        if (isset($parts[0])) {
+            return $parts[0];
+        } else {
+            return "";
+        }
+    }
+
+    function getNextId() {
+        $maxId = 0;
+        if (($handle = fopen("wpsdoclist.csv", "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                $maxId = max($maxId, $data[0]);
+            }
+            fclose($handle);
+        }
+        return $maxId + 1;
+    }
+
+    function getDataById($id) {
+        if (($handle = fopen("wpsdoclist.csv", "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                if ($data[0] == $id) {
+                    fclose($handle);
+                    return $data;
+                }
+            }
+            fclose($handle);
+        }
+        return null;
+    }
+
+    function updateData($id, $title, $url, $update, $person, $notes) {
+        $rows = array();
+        if (($handle = fopen("wpsdoclist.csv", "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                if ($data[0] == $id) {
+                    $data[1] = $title;
+                    $data[2] = $url;
+                    $data[3] = $update;
+                    $data[4] = $person;
+                    $data[5] = $notes;
+                }
+                $rows[] = $data;
+            }
+            fclose($handle);
+        }
+        $fp = fopen('wpsdoclist.csv', 'w');
+        foreach ($rows as $row) {
+            fputcsv($fp, $row);
+        }
+        fclose($fp);
+    }
+
+    function deleteData($id) {
+        $rows = array();
+        if (($handle = fopen("wpsdoclist.csv", "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                if ($data[0] != $id) {
+                    $rows[] = $data;
+                }
+            }
+            fclose($handle);
+        }
+        $fp = fopen('wpsdoclist.csv', 'w');
+        foreach ($rows as $row) {
+            fputcsv($fp, $row);
+        }
+        fclose($fp);
+    }
+    ?>
+  </div >
+</body>
+</html>
+”

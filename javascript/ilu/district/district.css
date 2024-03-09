@@ -1,0 +1,92 @@
+
+.district {
+    position:relative;
+    width:100%;
+    cursor:pointer;
+}
+
+.district .choiced span:not(:last-child)::after {
+    content: '/';
+    padding-left:10px;
+    padding-right:6px;
+}
+
+.district .database {
+    position:absolute;
+    left:-1px;
+    top:100%;
+    width:30rem;
+    border:1px solid #ced4da;
+    background-color:#fff;
+    display: none;
+    cursor:default;
+    z-index:10000;
+}
+.district.show .database {
+    display: block;
+}
+.district .database .header {
+    height:3rem;
+    line-height:3.2rem;
+    border-bottom:1px solid #eee;
+    background-color:#f9fafd;
+}
+.district .header .close {
+    top:.3rem;
+    height:2.2rem;
+    width:2.2rem;
+    font-size:2.1rem;
+}
+.district .database .header span {
+    display:inline-block;
+    height:3rem;
+    padding: 0 2rem;
+    border-right:1px solid #eee;
+    cursor: pointer;
+}
+.district .database .header span.active {
+    background-color:#fff;
+}
+.district .database .bodyer {
+    padding:.5rem;
+}
+.district .database .bodyer .pannel {
+    padding-top:.5rem;
+    padding-left:.5rem;
+    display: none;
+}
+.district .database .bodyer .pannel.active {
+    display:block;
+}
+.district .database .bodyer .pannel li {
+    display:inline-block;
+    margin-bottom:.5rem;
+    margin-right:.5rem;
+    padding:2px .5rem;
+    width:6.5rem;
+    border-radius:2px;
+    cursor: pointer;
+}
+.district .database .bodyer .pannel li:hover,
+.district .database .bodyer .pannel li.active {
+    background-color:#0d6efd;
+    color:#fff;
+}
+.district .database .bodyer .pannel li:hover:not(.active) {
+    opacity: .5;
+}
+
+.district .carets {
+    top: 14px;
+    right: 10px;
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    border: 10px dashed transparent;
+    border-top-style: solid;
+    border-width: 8px 8px 0;
+    border-top-color: #aaa;
+    pointer-events: none;
+    z-index: 1;
+}
