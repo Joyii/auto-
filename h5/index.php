@@ -133,16 +133,22 @@ $properties = Database::select($sql, null, 'default');
             width: 100%;
             height:300px;
         }
-
-
+        #drop-zone {
+            border: 2px dashed #ccc;
+            height: 200px;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
 
 <div id="divMain">
     <div id="divPrompt">
-        <div id="divFileInput">
-            File Input Area
+        <div id="drop-zone">
+            请拖拽文件到这里
         </div>
         <div id="divPromptMain">
             <div id="divLPromptList">
@@ -192,17 +198,9 @@ $properties = Database::select($sql, null, 'default');
             <div></div>
         </div>
         <div class="tab-content active" id="divFileProcess">
-            <table id="tableFileProcess">
-                <tr><td>姓名</td><td>性别</td><td>年龄</td><td>工资</td><td>入职时间</td></tr>
-                <tr><td>张三</td><td>男</td><td>30</td><td>30000</td><td>2024/1/2</td></tr>
-                <tr><td>张四</td><td>男</td><td>31</td><td>30001</td><td>2024/1/3</td></tr>
-                <tr><td>张五</td><td>男</td><td>32</td><td>30002</td><td>2024/1/4</td></tr>
-                <tr><td>张六</td><td>女</td><td>33</td><td>30003</td><td>2024/1/5</td></tr>
-                <tr><td>张七</td><td>女</td><td>34</td><td>30004</td><td>2024/1/6</td></tr>
-                <tr><td>张八</td><td>女</td><td>35</td><td>30005</td><td>2024/1/7</td></tr>
-                <tr><td>张九</td><td>男</td><td>36</td><td>30006</td><td>2024/1/8</td></tr>
-                <tr><td>张十</td><td>男</td><td>37</td><td>30007</td><td>2024/1/9</td></tr>
-            </table>
+
+            <div id="preview"></div>
+
 
         </div>
         <div class="tab-content" id="divSqlProcess">
@@ -217,34 +215,43 @@ $properties = Database::select($sql, null, 'default');
 
 
 </div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
 <script>
+    let dropZone = document.getElementById('drop-zone');
+    let previewDiv = document.getElementById('preview');
 
-    // 创建基本确认对话框
-    function showConfirmationDialog(message, callback) {
-        $("<div></div>").html(message).dialog({
-            resizable: false,
-            height: "auto",
-            width: 400,
-            modal: true,
-            buttons: {
-                "确定": function() {
-                    $(this).dialog("close");
-                    if(callback) {
-                        callback(true);
-                    }
-                },
-                "取消": function() {
-                    $(this).dialog("close");
-                    if(callback) {
-                        callback(false);
-                    }
-                }
-            }
-        });
+    dropZone.addEventListener('dragover', handleDragOver, false);
+    dropZone.addEventListener('drop', handleFileSelect, false);
+
+    function handleDragOver(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
     }
 
+    function handleFileSelect(e) {
+        e.stopPropagation();
+        e.preventDefault();
 
+        let files = e.dataTransfer.files;
+        if (files.length > 0) {
+            let file = files[0];
+            let reader = new FileReader();
+
+            reader.onload = function(e) {
+                let data = e.target.result;
+                let workbook = XLSX.read(data, { type: 'binary' });
+                let sheetName = workbook.SheetNames[0];
+                let worksheet = workbook.Sheets[sheetName];
+                let html = XLSX.utils.sheet_to_html(worksheet);
+                previewDiv.innerHTML = html;
+            }
+
+            reader.readAsBinaryString(file);
+        }
+    }
+</script>
+<script>
 
     function execSql() {
 
@@ -343,7 +350,13 @@ $properties = Database::select($sql, null, 'default');
         let desc = $('#hidden_desc_' + id ).val();
 
         // 获取表格元素
-        let table = $('#tableFileProcess');
+        // let table = $('#tableFileProcess');
+        let table = $('#preview table');
+        if(!table){
+            alert('请先上传excel文件，并保证excel格式正确');
+            return;
+        }
+
 
         // 将参数字符串以逗号分隔为数组
         let params = paramsStr.split(',');
