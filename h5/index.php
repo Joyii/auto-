@@ -271,12 +271,17 @@ $properties = Database::select($sql, null, 'default');
                 data: { sql: textSql ,action: 'create_table'},
                 dataType: "json",
                 success: function(response) {
+                    let currentTimeStamp = new Date().getTime();
+                    let currentTime = new Date(currentTimeStamp).toLocaleString();
+                    let msgText = "";
+                    console.log(currentTime);
                     if(response['message'])
-                        labelSqlInfo.text(response['message'] );
+                        msgText = response['message'] ;
                     else if(response['error'])
-                        labelSqlInfo.text(response['error'] );
+                        msgText = response['error'] ;
                     else
-                        labelSqlInfo.text('未知信息');
+                        msgText = '未知信息';
+                    labelSqlInfo.text(currentTime + ":" + msgText);
                 },
                 error: function(xhr, status, error) {
                     console.log(error);
