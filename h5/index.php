@@ -193,9 +193,17 @@ $properties = Database::select($sql, null, 'default');
         </div>
         <div class="tab-content active" id="divFileProcess">
             <table id="tableFileProcess">
-                <tr><td>姓名 性别</td><td>年龄 工资</td></tr>
-                <tr><td>张三 男</td><td>23 90000</td></tr>
+                <tr><td>姓名</td><td>性别</td><td>年龄</td><td>工资</td><td>入职时间</td></tr>
+                <tr><td>张三</td><td>男</td><td>30</td><td>30000</td><td>2024/1/2</td></tr>
+                <tr><td>张四</td><td>男</td><td>31</td><td>30001</td><td>2024/1/3</td></tr>
+                <tr><td>张五</td><td>男</td><td>32</td><td>30002</td><td>2024/1/4</td></tr>
+                <tr><td>张六</td><td>女</td><td>33</td><td>30003</td><td>2024/1/5</td></tr>
+                <tr><td>张七</td><td>女</td><td>34</td><td>30004</td><td>2024/1/6</td></tr>
+                <tr><td>张八</td><td>女</td><td>35</td><td>30005</td><td>2024/1/7</td></tr>
+                <tr><td>张九</td><td>男</td><td>36</td><td>30006</td><td>2024/1/8</td></tr>
+                <tr><td>张十</td><td>男</td><td>37</td><td>30007</td><td>2024/1/9</td></tr>
             </table>
+
         </div>
         <div class="tab-content" id="divSqlProcess">
             <div><textarea id="textSql" class="textSql" placeholder="请从AI界面将生成的sql复制到此页面"></textarea>
@@ -346,11 +354,32 @@ $properties = Database::select($sql, null, 'default');
 
             let rowContent = '';
             table.find('tr').eq(index).find('td').each(function() {
-                rowContent += $(this).text(); // 获取 <td> 元素的文本内容并拼接
+                rowContent += " " + $(this).text(); // 获取 <td> 元素的文本内容并拼接
             });
-            // 将标题中的参数值替换为行内容
-            console.log(rowContent);
-            desc = desc.replace(new RegExp('{{param_' + (index+1) + '}}', 'g'), rowContent);
+
+            if (param === "param_data") {
+
+                rowContent += "\n"; // 换行
+                // 获取当前行的索引
+                let currentIndex = index+1;
+
+                // 继续循环 table 后续的表格
+                while (currentIndex < table.find('tr').length) {
+                    // 遍历下一行的每个 <td> 元素，将内容拼接到 rowContent 中并换行
+                    table.find('tr').eq(currentIndex).find('td').each(function() {
+                        rowContent += " " + $(this).text(); // 获取 <td> 元素的文本内容并拼接
+                    });
+                    rowContent += "\n"; // 换行
+
+                    currentIndex++; // 更新索引以继续下一行
+                }
+
+                desc = desc.replace(new RegExp('{{param_data}}', 'g'), rowContent);
+            }
+            else{
+                desc = desc.replace(new RegExp('{{param_' + (index+1) + '}}', 'g'), rowContent);
+            }
+
         });
 
         // 返回替换后的标题值
